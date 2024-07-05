@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéFocus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --text-color: #3c5aa6;
+            --primary-color: #ffcb05;
+            --secondary-color: #3c5aa6;
+            --container-bg: rgba(255, 255, 255, 0.8);
+            --button-bg: #ffcb05;
+            --button-text: #3c5aa6;
+            --button-hover-bg: #3c5aa6;
+            --button-hover-text: #ffcb05;
+            --pokemon-bg: #f0f0f0;
+            --selection-bg: #3c5aa6;
+            --selection-border: #ffcb05;
+            --bg-image: url('https://wallpapercave.com/wp/wp5027254.jpg');
+
+        }
+        
+        [data-theme="dark"] {
+            --bg-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --primary-color: #f1c40f;
+            --secondary-color: #3498db;
+            --container-bg: rgba(44, 62, 80, 0.8);
+            --button-bg: #f1c40f;
+            --button-text: #2c3e50;
+            --button-hover-bg: #3498db;
+            --button-hover-text: #f1c40f;
+            --pokemon-bg: #34495e;
+            --selection-bg: #3498db;
+            --selection-border: #f1c40f;
+            --bg-image: url('https://i.pinimg.com/originals/a0/de/0a/a0de0a1c3b5ac71fb6266867234e7461.jpg');
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            margin: 0;
+            padding: 20px;
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            text-align: center;
+            margin-top: 20px;
+            background-color: var(--container-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: var(--primary-color);
+            text-shadow: 2px 2px var(--secondary-color);
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        #timer {
+            font-size: 2em;
+            margin: 20px 0;
+            color: var(--text-color);
+        }
+        #pokemon {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--pokemon-bg);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #pokemon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        button, input {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8em;
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: var(--button-hover-bg);
+            color: var(--button-hover-text);
+        }
+        #timeInput {
+            width: 80px;
+            text-align: center;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+        }
+        #overTime {
+            color: #ff0000;
+            font-weight: bold;
+        }
+        #pokemonSelection {
+            margin: 20px 0;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--text-color);
+        }
+        #pokemonSelection img {
+            width: 60px;
+            height: 60px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background-color: var(--pokemon-bg);
+            border-radius: 50%;
+            padding: 5px;
+        }
+        #pokemonSelection img:hover {
+            transform: scale(1.1);
+        }
+        #pokemonSelection img.selected {
+            box-shadow: 0 0 10px var(--selection-border);
+            background-color: var(--selection-bg);
+        }
+        #themeToggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            font-size: 0.7em;
+            padding: 5px 10px;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+
+        .overlay-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--container-bg);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        .overlay-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .overlay-content p {
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+
+        .overlay-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .overlay-buttons button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8em;
+            padding: 10px 20px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .overlay-buttons button:hover {
+            background-color: var(--button-hover-bg);
+            color: var(--button-hover-text);
+        }
+
+    </style>
+
+
+</head>
+<body>
+    <button id="themeToggle">Toggle Theme</button>
+    <div class="container">
+        <h1>PokéFocus</h1>
+        <h2>Focus on the task at hand and Become the Greatest PokeMaster!</h2>
+        <input type="number" id="timeInput" min="1" value="25"> minutes
+        <button id="setTime">Set Time</button>
+        <div id="timer">25:00</div>
+        <div id="overTime" style="display: none;">Over Time: 00:00</div>
+        <button id="startStop">Start</button>
+        <button id="finish" disabled>Finish</button>
+        <button id="viewHistory">View History</button>
+        <div id="pokemonSelection">
+            <img src="https://img.pokemondb.net/sprites/black-white/anim/normal/charmander.gif" alt="Charmander" data-pokemon="4" class="selected">
+            <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/bulbasaur.gif" alt="Bulbasaur" data-pokemon="1">
+            <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/squirtle.gif" alt="Squirtle" data-pokemon="7">
+            <img src="https://img.pokemondb.net/sprites/black-white/anim/normal/chimchar.gif" alt="Chimchar" data-pokemon="25">
+            <img src="https://img.pokemondb.net/sprites/black-white/anim/normal/snivy.gif" alt="Snivy" data-pokemon="133">
+        </div>
+        <div id="pokemon">
+            <img src="https://img.pokemondb.net/sprites/black-white/anim/normal/charmander.gif" alt="Pokemon stage 1" id="pokemonImage">
+        </div>
+    </div>
+    <div id="giveUpOverlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Are you sure?</h2>
+            <p>Do you want to give up on your current Pokemon? It will turn into a ghost!</p>
+            <div class="overlay-buttons">
+                <button id="confirmGiveUp">Yes, give up</button>
+                <button id="cancelGiveUp">No, continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GHOST_IMAGE = 'https://img.pokemondb.net/sprites/black-white/anim/normal/gastly.gif';
+        const timer = document.getElementById('timer');
+        const overTimeDisplay = document.getElementById('overTime');
+        const startStopButton = document.getElementById('startStop');
+        const finishButton = document.getElementById('finish');
+        const viewHistoryButton = document.getElementById('viewHistory');
+        const pokemonImage = document.getElementById('pokemonImage');
+        const timeInput = document.getElementById('timeInput');
+        const setTimeButton = document.getElementById('setTime');
+        const giveUpOverlay = document.getElementById('giveUpOverlay');
+        const confirmGiveUpButton = document.getElementById('confirmGiveUp');
+        const cancelGiveUpButton = document.getElementById('cancelGiveUp');
+
+        function showGiveUpOverlay() {
+            giveUpOverlay.style.display = 'block';
+        }
+
+        function hideGiveUpOverlay() {
+            giveUpOverlay.style.display = 'none';
+        }
+
+        confirmGiveUpButton.addEventListener('click', () => {
+            hideGiveUpOverlay();
+            const timeFocused = totalTime - timeLeft;
+            addPokemonToHistory(true, timeFocused);
+            resetTimer();
+            updatePokemonImage(); // Make sure to update the Pokemon image
+        });
+
+        cancelGiveUpButton.addEventListener('click', hideGiveUpOverlay);
+
+
+        let totalTime = 25 * 60; 
+        let timeLeft = totalTime;
+        let overTime = 0;
+        let timerInterval;
+        let isRunning = false;
+        let isOverTime = false;
+        let currentStage = 1;
+        let selectedPokemon = 4; 
+
+        
+        const pokemonSprites = {
+            4: ['https://img.pokemondb.net/sprites/black-white/anim/normal/charmander.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/charmeleon.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/charizard.gif'],
+            1: ['https://img.pokemondb.net/sprites/black-white/anim/normal/bulbasaur.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/ivysaur.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/venusaur.gif'],
+            7: ['https://img.pokemondb.net/sprites/black-white/anim/normal/squirtle.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/wartortle.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/blastoise.gif'],
+            25: ['https://img.pokemondb.net/sprites/black-white/anim/normal/chimchar.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/monferno.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/infernape.gif'],
+            133: ['https://img.pokemondb.net/sprites/black-white/anim/normal/snivy.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/servine.gif', 'https://img.pokemondb.net/sprites/black-white/anim/normal/serperior.gif']
+        };
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+
+        function toggleTheme() {
+            if (htmlElement.getAttribute('data-theme') === 'light') {
+                htmlElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                htmlElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+
+        function updateTimer() {
+            if (isOverTime) {
+                timer.textContent = "00:00";
+                const minutes = Math.floor(overTime / 60);
+                const seconds = overTime % 60;
+                overTimeDisplay.textContent = `Over Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                overTimeDisplay.style.display = 'block';
+            } else {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function updatePokemonImage() {
+            const stage = Math.min(currentStage - 1, 2); // Ensure stage is 0, 1, or 2
+            pokemonImage.src = pokemonSprites[selectedPokemon][stage];
+        }
+
+        function setTime() {
+            const newTime = parseInt(timeInput.value);
+            if (newTime > 0) {
+                totalTime = newTime * 60;
+                timeLeft = totalTime;
+                overTime = 0;
+                isOverTime = false;
+                overTimeDisplay.style.display = 'none';
+                updateTimer();
+                currentStage = 1;
+                updatePokemonImage();
+            }
+        }
+
+        function selectPokemon(pokemonNumber) {
+            selectedPokemon = pokemonNumber;
+            document.querySelectorAll('#pokemonSelection img').forEach(img => {
+                img.classList.remove('selected');
+            });
+            document.querySelector(`#pokemonSelection img[data-pokemon="${pokemonNumber}"]`).classList.add('selected');
+            currentStage = 1;
+            updatePokemonImage();
+        }
+
+        function startStop() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                startStopButton.textContent = 'Start';
+                isRunning = false;
+            } else {
+                timerInterval = setInterval(() => {
+                    if (isOverTime) {
+                        overTime++;
+                    } else {
+                        timeLeft--;
+                        if (timeLeft === 0) {
+                            isOverTime = true;
+                            currentStage = 4; 
+                            updatePokemonImage();
+                        }
+                    }
+                    updateTimer();
+                    
+                    if (!isOverTime) {
+                        const stageInterval = totalTime / 3;
+                        if (timeLeft <= stageInterval * 2 && currentStage < 2) {
+                            currentStage = 2;
+                            updatePokemonImage();
+                        }
+                        if (timeLeft <= stageInterval && currentStage < 3) {
+                            currentStage = 3;
+                            updatePokemonImage();
+                        }
+                    }
+                }, 1000);
+                startStopButton.textContent = 'Stop';
+                isRunning = true;
+            }
+            finishButton.disabled = !isRunning;
+        }
+        
+        
+
+        function finish() {
+            if (isRunning) {
+                if (timeLeft > 0) {
+                    showGiveUpOverlay();
+                } else {
+                    addPokemonToHistory(false, totalTime + overTime);
+                    resetTimer();
+                }
+            }
+        }
+        
+
+        
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = totalTime;
+            overTime = 0;
+            isOverTime = false;
+            currentStage = 1;
+            isRunning = false;
+            startStopButton.textContent = 'Start';
+            finishButton.disabled = true;
+            overTimeDisplay.style.display = 'none';
+            updateTimer();
+            updatePokemonImage();
+        }
+        
+
+        function addPokemonToHistory(isIncomplete, duration) {
+            const history = JSON.parse(localStorage.getItem('pokemonHistory') || '[]');
+            history.push({ 
+                duration: totalTime / 60,
+                actualDuration: duration / 60,
+                timestamp: new Date().toISOString(),
+                pokemonId: isIncomplete ? 'ghost' : selectedPokemon,
+                isIncomplete: isIncomplete
+            });
+            localStorage.setItem('pokemonHistory', JSON.stringify(history));
+        }
+        
+
+        function viewHistory() {
+            window.location.href = 'history.html';
+        }
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme) {
+            htmlElement.setAttribute('data-theme', savedTheme);
+        } else if (prefersDark) {
+            htmlElement.setAttribute('data-theme', 'dark');
+        }
+
+
+        setTimeButton.addEventListener('click', setTime);
+        startStopButton.addEventListener('click', startStop);
+        finishButton.addEventListener('click', finish);
+        viewHistoryButton.addEventListener('click', viewHistory);
+
+        
+        document.querySelectorAll('#pokemonSelection img').forEach(img => {
+            img.addEventListener('click', () => selectPokemon(parseInt(img.dataset.pokemon)));
+        });
+
+        
+        updateTimer();
+        updatePokemonImage();
+        
+    </script>
+</body>
+</html>

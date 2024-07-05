@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéFocus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --text-color: #3c5aa6;
+            --primary-color: #ffcb05;
+            --secondary-color: #3c5aa6;
+            --card-bg: white;
+            --column-bg: rgba(240, 240, 240, 0.8);
+            --container-bg: rgba(255, 255, 255, 0.8);
+            --bg-image: url("https://wallpapercave.com/wp/wp5027254.jpg");
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --primary-color: #f1c40f;
+            --secondary-color: #3498db;
+            --card-bg: #34495e;
+            --column-bg: rgba(52, 73, 94, 0.8);
+            --container-bg: rgba(44, 62, 80, 0.8);
+            --bg-image: url("https://i.pinimg.com/originals/a0/de/0a/a0de0a1c3b5ac71fb6266867234e7461.jpg");
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            margin: 0;
+            padding: 20px;
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            text-shadow: 2px 2px var(--secondary-color);
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .kanban-board {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+            margin: 0 10px;
+            background-color: var(--column-bg);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .column-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border-radius: 3px;
+        }
+
+        .column-header:focus {
+            outline: none;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .card img {
+            max-width: 100%;
+            height: auto;
+            max-height: 100px;
+        }
+
+        .card select {
+            width: 100%;
+            margin-top: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8em;
+            padding: 5px;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: 3px;
+        }
+
+        button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8em;
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        #themeToggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            font-size: 0.7em;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <button id="themeToggle">Toggle Theme</button>
+    <div class="container">
+        <h1>PokeDex</h1>
+        <h2>Catch them All!</h2>
+        <button id="clearHistory">Clear History</button>
+        <button id="saveState">Save State</button>
+        <button id="backToTimer">Back to Timer</button>
+        <div class="kanban-board" id="kanbanBoard">
+            
+        </div>
+    </div>
+
+    <script>
+        const kanbanBoard = document.getElementById('kanbanBoard');
+        const clearHistoryButton = document.getElementById('clearHistory');
+        const saveStateButton = document.getElementById('saveState');
+        const backToTimerButton = document.getElementById('backToTimer');
+        const defaultColumns = ['Interviews', 'Academics', 'FullStack', 'Reading', 'Courses'];
+
+        const pokemonFinalSprites = {
+            4: 'https://img.pokemondb.net/sprites/black-white/anim/normal/charizard.gif',
+            1: 'https://img.pokemondb.net/sprites/black-white/anim/normal/venusaur.gif',
+            7: 'https://img.pokemondb.net/sprites/black-white/anim/normal/blastoise.gif',
+            25: 'https://img.pokemondb.net/sprites/black-white/anim/normal/infernape.gif',
+            133: 'https://img.pokemondb.net/sprites/black-white/anim/normal/serperior.gif',
+            ghost: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbHZtcnpza2g1ZTRjMWJjem45MjdndGpzNXp3M2IzaTJkem55ZTNpZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/kbR2wMLsyJrri/giphy.webp'
+        };
+        
+
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+
+        function toggleTheme() {
+            if (htmlElement.getAttribute('data-theme') === 'light') {
+                htmlElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                htmlElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+
+
+        function initializeBoard() {
+            const savedBoard = JSON.parse(localStorage.getItem('kanbanBoard')) || {};
+            const columns = savedBoard.columns || defaultColumns;
+
+            columns.forEach((columnName, index) => {
+                const column = document.createElement('div');
+                column.className = 'column';
+                column.innerHTML = `
+                    <div class="column-header" contenteditable="true">${columnName}</div>
+                    <div class="column-content"></div>
+                `;
+                kanbanBoard.appendChild(column);
+
+                const header = column.querySelector('.column-header');
+                header.addEventListener('blur', () => {
+                    saveBoard();
+                    updateColumnOptions();
+                });
+            });
+
+            loadCards();
+        }
+
+
+        function loadCards() {
+            const history = JSON.parse(localStorage.getItem('pokemonHistory') || '[]');
+            const savedBoard = JSON.parse(localStorage.getItem('kanbanBoard')) || {};
+            
+            history.forEach((session) => {
+                if (!session.id) {
+                    session.id = Date.now() + Math.random().toString(36).substr(2, 9);
+                }
+                const card = createCard(session);
+                const columnIndex = savedBoard.cardAssignments?.[session.id] || 0;
+                const column = kanbanBoard.children[columnIndex]?.querySelector('.column-content');
+                if (column) {
+                    column.appendChild(card);
+                } else {
+                    kanbanBoard.children[0].querySelector('.column-content').appendChild(card);
+                }
+            });
+        
+            updateColumnOptions();
+            
+            // Save the updated history with IDs
+            localStorage.setItem('pokemonHistory', JSON.stringify(history));
+        }
+
+
+
+        function createCard(session) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const finalSprite = pokemonFinalSprites[session.pokemonId];
+            card.innerHTML = `
+                <img src="${finalSprite}" alt="Pokemon ${session.pokemonId}">
+                <p>Battle Time: ${session.actualDuration.toFixed(1)} minutes</p>
+                <p>${new Date(session.timestamp).toLocaleDateString()}</p>
+                ${session.isIncomplete ? '<p style="color: red;">Incomplete Session</p>' : ''}
+                <select class="column-select">
+                    ${Array.from(kanbanBoard.children).map((col, index) => 
+                        `<option value="${index}">${col.querySelector('.column-header').textContent}</option>`
+                    ).join('')}
+                </select>
+            `;
+            card.dataset.id = session.id;
+        
+            const select = card.querySelector('.column-select');
+            select.addEventListener('change', (e) => moveCard(card, parseInt(e.target.value)));
+        
+            return card;
+        }
+        
+
+
+        function moveCard(card, columnIndex) {
+            const newColumn = kanbanBoard.children[columnIndex].querySelector('.column-content');
+            newColumn.appendChild(card);
+            saveBoard();
+        }
+
+        function updateColumnOptions() {
+            const columnNames = Array.from(kanbanBoard.children).map(col => col.querySelector('.column-header').textContent);
+            const selects = document.querySelectorAll('.column-select');
+            selects.forEach(select => {
+                const selectedValue = select.value;
+                select.innerHTML = columnNames.map((name, index) => 
+                    `<option value="${index}" ${index == selectedValue ? 'selected' : ''}>${name}</option>`
+                ).join('');
+            });
+        }
+
+        function saveBoard() {
+            const board = {
+                columns: Array.from(kanbanBoard.children).map(col => col.querySelector('.column-header').textContent),
+                cardAssignments: {}
+            };
+
+            Array.from(kanbanBoard.children).forEach((column, columnIndex) => {
+                column.querySelectorAll('.card').forEach(card => {
+                    board.cardAssignments[card.dataset.id] = columnIndex;
+                });
+            });
+
+            localStorage.setItem('kanbanBoard', JSON.stringify(board));
+        }
+
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
+                localStorage.removeItem('pokemonHistory');
+                localStorage.removeItem('kanbanBoard');
+                kanbanBoard.innerHTML = '';
+                initializeBoard();
+            }
+        }
+
+        function backToTimer() {
+            window.location.href = 'index.html';
+        }
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme) {
+            htmlElement.setAttribute('data-theme', savedTheme);
+        } else if (prefersDark) {
+            htmlElement.setAttribute('data-theme', 'dark');
+        }
+
+
+        initializeBoard();
+
+        clearHistoryButton.addEventListener('click', clearHistory);
+        saveStateButton.addEventListener('click', saveBoard);
+        backToTimerButton.addEventListener('click', backToTimer);
+    </script>
+</body>
+</html>
+
+
